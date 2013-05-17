@@ -26,12 +26,50 @@
 
 package com.noveogroup.android.cache.disk;
 
+import android.os.SystemClock;
+import android.util.Log;
+import com.noveogroup.android.cache.io.DefaultSerializer;
+import com.noveogroup.android.cache.io.FileSource;
+import com.noveogroup.android.cache.io.Serializer;
+import com.noveogroup.android.cache.util.Runner;
+
+import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * This class stores disk cache settings.
+ * This class stores and manages synchronization of disk cache settings.
  */
 class PropertyManager {
+
+//    private void sync() {
+//        MetaData common = serializer.load(new FileSource(propertiesFile));
+//        MetaData diffBackup = new MetaData();
+//        synchronized (lock) {
+//            common.putAll(diff);
+//
+//            properties.clear();
+//            properties.putAll(common);
+//
+//            diffBackup.putAll(diff);
+//            diff.clear();
+//        }
+//
+//        try {
+//            File tempFile = owner.createFile();
+//            serializer.save(new FileSource(tempFile), common);
+//            if (!tempFile.renameTo(propertiesFile)) {
+//                throw new IOException("cannot move " + tempFile + " to " + propertiesFile);
+//            }
+//        } catch (IOException e) {
+//            synchronized (lock) {
+//                diffBackup.putAll(diff);
+//                diff.clear();
+//                diff.putAll(diffBackup);
+//            }
+//            throw e;
+//        }
+//    }
 
     private static final String KEY_CLEAN_TIME_DELAY = "clean-time-delay";
     private static final String KEY_CLEAN_ACCESS_COUNT = "clean-access-count";
@@ -39,24 +77,91 @@ class PropertyManager {
     private static final String KEY_MAX_SIZE = "max-size";
     private static final String KEY_EXPIRATION_TIME = "expiration-time";
 
+    private static final String PROPERTIES_FILENAME = "properties.meta";
+    private static final long LOAD_DELAY = 60 * 1000;
+    private static final long SAVE_DELAY_BASE = 3 * 1000;
+    private static final long SAVE_DELAY_DIFF = 7 * 1000;
+
+    private final DiskCacheCore owner;
+    private final File propertiesFile;
+
     private final Object lock = new Object();
     private final MetaData properties = new MetaData();
+    private final MetaData diff = new MetaData();
+    private final Serializer<MetaData> serializer = new DefaultSerializer<MetaData>();
+    private long lastUpdateTime = 0;
+
+    private final Runner propertySaver = new Runner(Thread.MAX_PRIORITY) {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep((long) (SAVE_DELAY_BASE + Math.random() * SAVE_DELAY_DIFF));
+            } catch (InterruptedException ignored) {
+                return;
+            }
+
+            synchronized (lock) {
+                try {
+                    // we should save only diff
+                    MetaData metaData = serializer.load(new FileSource(propertiesFile));
+                    metaData.putAll(diff);
+                    File file = owner.createFile();
+                    serializer.save(new FileSource(file), metaData);
+                    if (file.renameTo(propertiesFile)) {
+                        throw new IOException("cannot move file from " + file + " to " + propertiesFile);
+                    }
+
+                    // properties will be merged only if saving has been successfully done
+                    diff.clear();
+                    properties.clear();
+                    properties.putAll(metaData);
+                    lastUpdateTime = SystemClock.uptimeMillis();
+                } catch (IOException e) {
+                    Log.v(DiskCacheCore.TAG, "cannot save properties", e);
+                }
+            }
+        }
+    };
 
     /**
      * Creates new instance of property manager.
+     *
+     * @param owner the owner cache.
      */
-    public PropertyManager() {
+    public PropertyManager(DiskCacheCore owner) {
+        this.owner = owner;
+        this.propertiesFile = new File(owner.getCacheDirectory(), PROPERTIES_FILENAME);
+        loadProperties();
+    }
+
+    private void loadProperties() {
+        if (SystemClock.uptimeMillis() - lastUpdateTime >= LOAD_DELAY) {
+            MetaData metaData;
+            try {
+                metaData = serializer.load(new FileSource(propertiesFile));
+            } catch (IOException e) {
+                Log.v(DiskCacheCore.TAG, "cannot load properties", e);
+                metaData = new MetaData();
+            }
+
+            diff.clear();
+            properties.clear();
+            properties.putAll(metaData);
+            lastUpdateTime = SystemClock.uptimeMillis();
+        }
     }
 
     private <T extends Serializable> T getValue(String key, T defaultValue) {
         synchronized (lock) {
-            return properties.getValue(key, defaultValue);
+            loadProperties();
+            return diff.getValue(key, properties.getValue(key, defaultValue));
         }
     }
 
     private <T extends Serializable> void putValue(String key, T value) {
         synchronized (lock) {
-            properties.putValue(key, value);
+            diff.putValue(key, value);
+            propertySaver.start();
         }
     }
 

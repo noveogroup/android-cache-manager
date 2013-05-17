@@ -228,7 +228,7 @@ public class DiskCacheCore<K> {
         this.storageDirectory = new File(cacheDirectory, SUBDIRECTORY_STORAGE);
         this.debugTimeout = debugMode ? DEBUG_TIMEOUT : 0;
         this.debugCleanProbability = debugMode ? DEBUG_CLEAN_PROBABILITY : 0.f;
-        this.propertyManager = new PropertyManager();
+        this.propertyManager = new PropertyManager(this);
     }
 
     /**

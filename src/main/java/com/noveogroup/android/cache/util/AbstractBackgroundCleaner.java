@@ -34,10 +34,15 @@ import android.os.SystemClock;
 public abstract class AbstractBackgroundCleaner {
 
     private final Object lock = new Object();
-    private boolean threadAlive = false;
-
     private long lastCleanTime = 0;
     private long accessCount = 0;
+
+    private Runner runner = new Runner(Thread.MIN_PRIORITY) {
+        @Override
+        public void run() {
+            cleanCache();
+        }
+    };
 
     /**
      * Starts a cleaning process if it isn't running now.
@@ -47,24 +52,7 @@ public abstract class AbstractBackgroundCleaner {
             lastCleanTime = SystemClock.uptimeMillis();
             accessCount = 0;
 
-            if (threadAlive) {
-                return;
-            } else {
-                new Thread() {
-                    @Override
-                    public void run() {
-                        setPriority(Thread.MIN_PRIORITY);
-                        try {
-                            cleanCache();
-                        } finally {
-                            synchronized (lock) {
-                                threadAlive = false;
-                            }
-                        }
-                    }
-                }.start();
-                threadAlive = true;
-            }
+            runner.start();
         }
     }
 
