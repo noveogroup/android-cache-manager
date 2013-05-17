@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.io;
+package com.noveogroup.android.cache.io;
 
 import java.io.IOException;
 

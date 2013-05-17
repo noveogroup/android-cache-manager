@@ -24,10 +24,10 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.disk;
+package com.noveogroup.android.cache.disk;
 
 import android.util.Log;
-import com.noveo.android.cache.io.*;
+import com.noveogroup.android.cache.io.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +37,7 @@ import java.io.Serializable;
  * Android Disk Cache.
  *
  * @param <K> a type of keys.
- * @see com.noveo.android.cache Description of Android Disk Cache
+ * @see com.noveogroup.android.cache Description of Android Disk Cache
  */
 public class DiskCache<K> extends DiskCacheCore<K> {
 

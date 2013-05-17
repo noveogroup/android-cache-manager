@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.util;
+package com.noveogroup.android.cache.util;
 
 import java.util.Collections;
 import java.util.Comparator;

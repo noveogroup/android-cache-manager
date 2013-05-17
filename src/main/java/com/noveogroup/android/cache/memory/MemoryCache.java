@@ -24,13 +24,13 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.memory;
+package com.noveogroup.android.cache.memory;
 
 import android.os.SystemClock;
-import com.noveo.android.cache.io.DefaultKeyManager;
-import com.noveo.android.cache.io.KeyManager;
-import com.noveo.android.cache.util.AbstractBackgroundCleaner;
-import com.noveo.android.cache.util.CleanerHelper;
+import com.noveogroup.android.cache.io.DefaultKeyManager;
+import com.noveogroup.android.cache.io.KeyManager;
+import com.noveogroup.android.cache.util.AbstractBackgroundCleaner;
+import com.noveogroup.android.cache.util.CleanerHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;

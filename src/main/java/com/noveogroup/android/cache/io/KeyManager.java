@@ -24,36 +24,31 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.memory;
+package com.noveogroup.android.cache.io;
 
 /**
- * This interface represents reference objects.
- * <p/>
- * References are thread-safe and should be used as synchronization object
- * during operations with referent values.
+ * KeyManager calculates hash codes of keys and check if two keys are equal.
+ * User can implement specific key managers for complex types of keys.
  *
- * @param <T> type of a reference object.
+ * @param <K> a type of keys.
  */
-public interface Reference<T> {
+public interface KeyManager<K> {
 
     /**
-     * Clears this reference object.
-     */
-    public void clear();
-
-    /**
-     * Returns this reference object's referent.
+     * Calculates hash code of the key.
      *
-     * @return The object to which this reference refers, or <code>null</code>
-     *         if this reference object has been cleared.
+     * @param key the key. May be null.
+     * @return the hash code.
      */
-    public T get();
+    public int hashCode(K key);
 
     /**
-     * Returns size of this reference's value.
+     * Checks if two keys are equal.
      *
-     * @return the size or 0 if this reference object has been cleared.
+     * @param key1 the first key. May be null.
+     * @param key2 the second key. May be null.
+     * @return true if keys are equal otherwise false.
      */
-    public long size();
+    public boolean equals(K key1, K key2);
 
 }

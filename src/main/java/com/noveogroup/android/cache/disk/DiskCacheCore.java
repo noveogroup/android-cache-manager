@@ -24,14 +24,14 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.disk;
+package com.noveogroup.android.cache.disk;
 
 import android.os.SystemClock;
 import android.util.Log;
-import com.noveo.android.cache.io.KeyManager;
-import com.noveo.android.cache.io.Serializer;
-import com.noveo.android.cache.util.AbstractBackgroundCleaner;
-import com.noveo.android.cache.util.CleanerHelper;
+import com.noveogroup.android.cache.io.KeyManager;
+import com.noveogroup.android.cache.io.Serializer;
+import com.noveogroup.android.cache.util.AbstractBackgroundCleaner;
+import com.noveogroup.android.cache.util.CleanerHelper;
 
 import java.io.File;
 import java.io.IOException;

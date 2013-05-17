@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.disk;
+package com.noveogroup.android.cache.disk;
 
 import java.io.Serializable;
 import java.util.HashMap;

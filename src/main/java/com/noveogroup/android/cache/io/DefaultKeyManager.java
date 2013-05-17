@@ -24,35 +24,29 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.io;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInput;
-import java.io.ObjectOutput;
+package com.noveogroup.android.cache.io;
 
 /**
- * This implementation of serializer saves and loads byte arrays.
+ * Default implementation of key manager.
+ * Uses {@link Object#hashCode()} and {@link Object#equals(Object)} to
+ * calculate hash codes and compare keys.
+ *
+ * @param <K> the type of keys.
  */
-public class ByteArraySerializer extends AbstractSerializer<byte[]> {
-
-    private static final int DEFAULT_BUFFER_SIZE = 1024;
+public class DefaultKeyManager<K> implements KeyManager<K> {
 
     @Override
-    protected void save(ObjectOutput objectOutput, byte[] value) throws IOException {
-        objectOutput.write(value, 0, value.length);
+    public int hashCode(K key) {
+        return key == null ? 0 : key.hashCode();
     }
 
     @Override
-    protected byte[] load(ObjectInput objectInput) throws IOException {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
-        for (int length = 0; length != -1; length = objectInput.read(buffer)) {
-            outputStream.write(buffer, 0, length);
+    public boolean equals(K key1, K key2) {
+        if (key1 == null) {
+            return key2 == null;
+        } else {
+            return key1.equals(key2);
         }
-
-        return outputStream.toByteArray();
     }
 
 }

@@ -24,22 +24,22 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.disk;
+package com.noveogroup.android.cache.disk;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 
 /**
- * InputStreamAdapter can be used to represent RandomAccessFile as a InputStream object.
+ * InputStreamAdapter can be used to represent RandomAccessFile as a OutputStream object.
  */
-class InputStreamAdapter extends InputStream {
+class OutputStreamAdapter extends OutputStream {
 
     private final Object lock;
     private boolean isClosed;
     private final RandomAccessFile randomAccessFile;
+    private final long beginPosition;
     private long currentPosition;
-    private final long endPosition;
 
     /**
      * Creates new adapter.
@@ -47,21 +47,17 @@ class InputStreamAdapter extends InputStream {
      * @param lock             the lock object.
      * @param randomAccessFile the random access file.
      * @param beginPosition    position of the begin of the stream.
-     * @param endPosition      position of the end of the stream.
      */
-    public InputStreamAdapter(Object lock, RandomAccessFile randomAccessFile, long beginPosition, long endPosition) {
+    public OutputStreamAdapter(Object lock, RandomAccessFile randomAccessFile, long beginPosition) {
         if (lock == null || randomAccessFile == null) {
             throw new NullPointerException();
-        }
-        if (beginPosition > endPosition) {
-            throw new IllegalArgumentException();
         }
 
         this.lock = lock;
         this.isClosed = false;
         this.randomAccessFile = randomAccessFile;
+        this.beginPosition = beginPosition;
         this.currentPosition = beginPosition;
-        this.endPosition = endPosition;
     }
 
     /**
@@ -69,22 +65,9 @@ class InputStreamAdapter extends InputStream {
      *
      * @param randomAccessFile the random access file.
      * @param beginPosition    position of the begin of the stream.
-     * @param endPosition      position of the end of the stream.
      */
-    public InputStreamAdapter(RandomAccessFile randomAccessFile, long beginPosition, long endPosition) {
-        this(new Object(), randomAccessFile, beginPosition, endPosition);
-    }
-
-    @Override
-    public int available() throws IOException {
-        synchronized (lock) {
-            if (isClosed) {
-                return 0;
-            } else {
-                long available = endPosition - currentPosition;
-                return (int) Math.max(0, Math.min(Integer.MAX_VALUE, available));
-            }
-        }
+    public OutputStreamAdapter(RandomAccessFile randomAccessFile, long beginPosition) {
+        this(new Object(), randomAccessFile, beginPosition);
     }
 
     /**
@@ -105,48 +88,39 @@ class InputStreamAdapter extends InputStream {
         }
     }
 
+    /**
+     * Returns count of bytes already written.
+     *
+     * @return length of the stream.
+     */
+    public long length() {
+        return currentPosition - beginPosition;
+    }
+
     @Override
-    public int read() throws IOException {
+    public void write(int b) throws IOException {
         synchronized (lock) {
-            if (available() > 0) {
+            if (!isClosed) {
                 randomAccessFile.seek(currentPosition);
-                int read = randomAccessFile.read();
+                randomAccessFile.write(b);
                 currentPosition = randomAccessFile.getFilePointer();
-                return read;
-            } else {
-                return -1;
             }
         }
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
-        return read(b, 0, b.length);
+    public void write(byte[] b) throws IOException {
+        write(b, 0, b.length);
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) throws IOException {
         synchronized (lock) {
-            int available = available();
-            if (available > 0) {
+            if (!isClosed) {
                 randomAccessFile.seek(currentPosition);
-                int read = randomAccessFile.read(b, off, Math.min(len, available));
+                randomAccessFile.write(b, off, len);
                 currentPosition = randomAccessFile.getFilePointer();
-                return read;
-            } else {
-                return -1;
             }
-        }
-    }
-
-    @Override
-    public long skip(long n) throws IOException {
-        synchronized (lock) {
-            int available = available();
-            n = Math.min(n, available);
-            randomAccessFile.seek(currentPosition + n);
-            currentPosition = randomAccessFile.getFilePointer();
-            return n;
         }
     }
 

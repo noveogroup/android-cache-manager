@@ -24,41 +24,36 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.io;
+package com.noveogroup.android.cache.io;
 
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
+import java.io.Serializable;
 
 /**
- * loads and save string as  byte[], not as object.
- * Set charset which needs in constructor, otherwise default platform charset will be used
+ * Default implementation of serializer.
+ * Uses standard serialization to save/load the values.
+ *
+ * @param <T> the type of values.
  */
-public class StringSerializer extends AbstractSerializer<String> {
-
-    private static final String DEFAULT_CHARSET = "UTF-8";
-
-    private final String charset;
-    private final ByteArraySerializer serializer;
-
-    public StringSerializer() {
-        this(DEFAULT_CHARSET);
-    }
-
-    public StringSerializer(String charset) {
-        this.charset = charset;
-        this.serializer = new ByteArraySerializer();
-    }
-
+public class DefaultSerializer<T extends Serializable> extends AbstractSerializer<T> {
 
     @Override
-    protected void save(ObjectOutput objectOutput, String value) throws IOException {
-        serializer.save(objectOutput, value.getBytes(charset));
+    protected void save(ObjectOutput objectOutput, T value) throws IOException {
+        objectOutput.writeObject(value);
     }
 
     @Override
-    protected String load(ObjectInput objectInput) throws IOException {
-        return new String(serializer.load(objectInput), charset);
+    @SuppressWarnings("unchecked")
+    protected T load(ObjectInput objectInput) throws IOException {
+        try {
+            return (T) objectInput.readObject();
+        } catch (ClassNotFoundException e) {
+            IOException ioException = new IOException();
+            ioException.initCause(e);
+            throw ioException;
+        }
     }
 
 }

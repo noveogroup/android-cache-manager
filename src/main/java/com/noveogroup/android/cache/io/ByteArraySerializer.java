@@ -24,36 +24,35 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.io;
+package com.noveogroup.android.cache.io;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serializable;
 
 /**
- * Default implementation of serializer.
- * Uses standard serialization to save/load the values.
- *
- * @param <T> the type of values.
+ * This implementation of serializer saves and loads byte arrays.
  */
-public class DefaultSerializer<T extends Serializable> extends AbstractSerializer<T> {
+public class ByteArraySerializer extends AbstractSerializer<byte[]> {
+
+    private static final int DEFAULT_BUFFER_SIZE = 1024;
 
     @Override
-    protected void save(ObjectOutput objectOutput, T value) throws IOException {
-        objectOutput.writeObject(value);
+    protected void save(ObjectOutput objectOutput, byte[] value) throws IOException {
+        objectOutput.write(value, 0, value.length);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    protected T load(ObjectInput objectInput) throws IOException {
-        try {
-            return (T) objectInput.readObject();
-        } catch (ClassNotFoundException e) {
-            IOException ioException = new IOException();
-            ioException.initCause(e);
-            throw ioException;
+    protected byte[] load(ObjectInput objectInput) throws IOException {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
+        for (int length = 0; length != -1; length = objectInput.read(buffer)) {
+            outputStream.write(buffer, 0, length);
         }
+
+        return outputStream.toByteArray();
     }
 
 }

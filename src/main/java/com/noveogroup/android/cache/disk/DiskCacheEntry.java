@@ -24,12 +24,12 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.disk;
+package com.noveogroup.android.cache.disk;
 
-import com.noveo.android.cache.io.DefaultSerializer;
-import com.noveo.android.cache.io.InputSource;
-import com.noveo.android.cache.io.OutputSource;
-import com.noveo.android.cache.io.Serializer;
+import com.noveogroup.android.cache.io.DefaultSerializer;
+import com.noveogroup.android.cache.io.InputSource;
+import com.noveogroup.android.cache.io.OutputSource;
+import com.noveogroup.android.cache.io.Serializer;
 
 import java.io.*;
 

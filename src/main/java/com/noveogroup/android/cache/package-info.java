@@ -25,6 +25,32 @@
  */
 
 /**
- * TODO write JavaDoc
+ * Provides classes of Android Cache Manager.
+ * <p>
+ * Android Cache Manager contains an Android Disk Cache that implements
+ * LRU algorithm to manage cache data stored on the disk.
+ * This cache has the following features:
+ * <ul>
+ * <li>Short access time</li>
+ * <li>Flexible cleaning settings</li>
+ * The cache cleans its storage according to user's settings such as
+ * max age of file within the cache and max size of the cache.
+ * <li>Thread-safe implementation</li>
+ * The same Android Disk Cache can be used by different threads of
+ * one JVM, and even by different JVMs.
+ * <li>User-friendly interface</li>
+ * In addition to main implementation of cache storage there is
+ * a simple implementation. New instances of cache can be created
+ * without any difficulties just using default settings.
+ * <li>Meta data support</li>
+ * Users can store additional meta-data with any cache entry.
+ * <li>Useful debug mode</li>
+ * When debugging is turned on disk cache will emulate additional time delay
+ * for I/O operations, delete entries unexpectedly and immediately report
+ * any exceptions.
+ * <li>Detailed logging</li>
+ * <li>Fail-safety</li>
+ * </ul>
+ * </p>
  */
 package com.noveogroup.android.cache;

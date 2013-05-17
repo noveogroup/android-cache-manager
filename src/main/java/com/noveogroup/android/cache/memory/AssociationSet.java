@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-package com.noveo.android.cache.memory;
+package com.noveogroup.android.cache.memory;
 
 import java.util.*;
 
