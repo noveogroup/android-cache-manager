@@ -10,9 +10,9 @@ __Code Samples__: [[here]](https://github.com/noveogroup/android-cache-manager/t
 Downloads
 ---------
 
- - [android-cache-manager-1.0.jar](https://github.com/noveogroup/android-logger/blob/gh-downloads/android-cache-manager-1.0.jar?raw=true)
- - [android-cache-manager-1.0-sources.jar](https://github.com/noveogroup/android-logger/blob/gh-downloads/android-cache-manager-1.0-sources.jar?raw=true)
- - [android-cache-manager-1.0-javadoc.jar](https://github.com/noveogroup/android-logger/blob/gh-downloads/android-cache-manager-1.0-javadoc.jar?raw=true)
+ - [android-cache-manager-1.3.4.jar](https://github.com/noveogroup/android-cache-manager/blob/gh-downloads/android-cache-manager-1.3.4.jar?raw=true)
+ - [android-cache-manager-1.3.4-sources.jar](https://github.com/noveogroup/android-cache-manager/blob/gh-downloads/android-cache-manager-1.3.4-sources.jar?raw=true)
+ - [android-cache-manager-1.3.4-javadoc.jar](https://github.com/noveogroup/android-cache-manager/blob/gh-downloads/android-cache-manager-1.3.4-javadoc.jar?raw=true)
 
 [Previous versions](https://github.com/noveogroup/android-cache-manager/tree/gh-downloads)
 
@@ -22,13 +22,13 @@ Maven Dependency
     <dependency>
         <groupId>com.noveogroup.android</groupId>
         <artifactId>android-cache-manager</artifactId>
-        <version>1.0</version>
+        <version>1.3.4</version>
     </dependency>
 
 Gradle Dependency
 -----------------
 
-'com.noveogroup.android:android-cache-manager:1.0'
+'com.noveogroup.android:android-cache-manager:1.3.4'
 
 
 Getting Started
