@@ -34,7 +34,7 @@ import java.io.Serializable;
 class PropertyManager {
 
     private static final String KEY_CLEAN_TIME_DELAY = "clean-time-delay";
-    private static final String KEY_CLEAN_ACCESS_COUNT = "clean-access-count";
+    private static final String KEY_CLEAN_MODIFICATION_COUNT = "clean-modification-count";
     private static final String KEY_MAX_AGE = "max-age";
     private static final String KEY_MAX_SIZE = "max-size";
     private static final String KEY_EXPIRATION_TIME = "expiration-time";
@@ -80,22 +80,22 @@ class PropertyManager {
     }
 
     /**
-     * Returns clean access count.
+     * Returns clean modification count.
      *
      * @param defaultValue a default value.
-     * @return clean access count value.
+     * @return clean modification count value.
      */
-    public long getCleanAccessCount(long defaultValue) {
-        return getValue(KEY_CLEAN_ACCESS_COUNT, defaultValue);
+    public long getCleanModificationCount(long defaultValue) {
+        return getValue(KEY_CLEAN_MODIFICATION_COUNT, defaultValue);
     }
 
     /**
-     * Sets clean access count.
+     * Sets clean modification count.
      *
-     * @param cleanAccessCount new value of clean access count.
+     * @param cleanAccessCount new value of clean modification count.
      */
-    public void setCleanAccessCount(long cleanAccessCount) {
-        putValue(KEY_CLEAN_ACCESS_COUNT, cleanAccessCount);
+    public void setCleanModificationCount(long cleanAccessCount) {
+        putValue(KEY_CLEAN_MODIFICATION_COUNT, cleanAccessCount);
     }
 
     /**

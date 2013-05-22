@@ -50,9 +50,9 @@ public class MemoryCache<K, V> {
      */
     public static final long DEFAULT_CLEAN_TIME_DELAY = 3 * 60 * 1000;
     /**
-     * Default value of clean access count.
+     * Default value of clean modification count.
      */
-    public static final long DEFAULT_CLEAN_ACCESS_COUNT = 100;
+    public static final long DEFAULT_CLEAN_MODIFICATION_COUNT = 100;
     /**
      * Default value of max age.
      */
@@ -174,6 +174,8 @@ public class MemoryCache<K, V> {
          */
         public long size() {
             synchronized (owner.lock) {
+                owner.cleaner.access(false, owner.getCleanTimeDelay(), owner.getCleanModificationCount());
+
                 long size = 0;
                 for (ValueHolder valueHolder : owner.associations.getAssociated(token)) {
                     size += valueHolder.size();
@@ -190,6 +192,8 @@ public class MemoryCache<K, V> {
          */
         public Reference<V> get(K key) {
             synchronized (owner.lock) {
+                owner.cleaner.access(false, owner.getCleanTimeDelay(), owner.getCleanModificationCount());
+
                 KeyHolder<K, V> keyHolder = new KeyHolder<K, V>(owner, key);
 
                 ValueHolder<K, V> valueHolder = owner.cache.get(keyHolder);
@@ -218,7 +222,7 @@ public class MemoryCache<K, V> {
          */
         public void put(K key, V value) {
             synchronized (owner.lock) {
-                owner.cleaner.access(DEFAULT_CLEAN_TIME_DELAY, DEFAULT_CLEAN_ACCESS_COUNT);
+                owner.cleaner.access(true, owner.getCleanTimeDelay(), owner.getCleanModificationCount());
 
                 KeyHolder<K, V> keyHolder = new KeyHolder<K, V>(owner, key);
 
@@ -275,7 +279,7 @@ public class MemoryCache<K, V> {
     private final KeyManager<K> keyManager;
 
     private volatile long cleanTimeDelay = DEFAULT_CLEAN_TIME_DELAY;
-    private volatile long cleanAccessCount = DEFAULT_CLEAN_ACCESS_COUNT;
+    private volatile long cleanModificationCount = DEFAULT_CLEAN_MODIFICATION_COUNT;
     private volatile long maxAge = DEFAULT_MAX_AGE;
     private volatile long maxSize = DEFAULT_MAX_SIZE;
     private volatile long expirationTime = DEFAULT_EXPIRATION_TIME;
@@ -353,21 +357,21 @@ public class MemoryCache<K, V> {
     }
 
     /**
-     * Returns clean access count value.
+     * Returns clean modification count value.
      *
-     * @return clean access count.
+     * @return clean modification count.
      */
-    public long getCleanAccessCount() {
-        return cleanAccessCount;
+    public long getCleanModificationCount() {
+        return cleanModificationCount;
     }
 
     /**
-     * Sets clean access count.
+     * Sets clean modification count.
      *
-     * @param cleanAccessCount new clean access count.
+     * @param cleanModificationCount new clean modification count.
      */
-    public void setCleanAccessCount(long cleanAccessCount) {
-        this.cleanAccessCount = cleanAccessCount;
+    public void setCleanModificationCount(long cleanModificationCount) {
+        this.cleanModificationCount = cleanModificationCount;
     }
 
     /**
@@ -451,6 +455,8 @@ public class MemoryCache<K, V> {
      */
     public long size() {
         synchronized (lock) {
+            cleaner.access(false, getCleanTimeDelay(), getCleanModificationCount());
+
             long size = 0;
             for (ValueHolder valueHolder : cache.values()) {
                 size += valueHolder.size();

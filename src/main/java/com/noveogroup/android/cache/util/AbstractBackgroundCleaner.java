@@ -37,7 +37,7 @@ public abstract class AbstractBackgroundCleaner {
     private boolean threadAlive = false;
 
     private long lastCleanTime = 0;
-    private long accessCount = 0;
+    private long modificationCount = 0;
 
     /**
      * Starts a cleaning process if it isn't running now.
@@ -45,7 +45,7 @@ public abstract class AbstractBackgroundCleaner {
     public void clean() {
         synchronized (lock) {
             lastCleanTime = SystemClock.uptimeMillis();
-            accessCount = 0;
+            modificationCount = 0;
 
             if (threadAlive) {
                 return;
@@ -69,21 +69,24 @@ public abstract class AbstractBackgroundCleaner {
     }
 
     /**
-     * Should be called when user makes some modification in the cache.
+     * Should be called when user does some operation with the cache.
      * Can cause starting of cleaning process if there was a lot of
      * modifications or cleaning process had been running long time ago.
      *
-     * @param cleanTimeDelay   the time delay between cleanings.
-     * @param cleanAccessCount the maximum count of access between cleanings.
+     * @param modification           whether the operation is modification or not.
+     * @param cleanTimeDelay         the time delay between cleanings.
+     * @param cleanModificationCount the maximum count of modifications between cleanings.
      */
-    public void access(long cleanTimeDelay, long cleanAccessCount) {
+    public void access(boolean modification, long cleanTimeDelay, long cleanModificationCount) {
         synchronized (lock) {
-            accessCount++;
+            if (modification) {
+                modificationCount++;
+            }
 
             if (lastCleanTime == 0) {
                 lastCleanTime = SystemClock.uptimeMillis();
             }
-            if (SystemClock.uptimeMillis() - lastCleanTime > cleanTimeDelay || accessCount > cleanAccessCount) {
+            if (SystemClock.uptimeMillis() - lastCleanTime > cleanTimeDelay || modificationCount > cleanModificationCount) {
                 clean();
             }
         }

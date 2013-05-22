@@ -60,9 +60,9 @@ public class DiskCacheCore<K> {
      */
     public static final long DEFAULT_CLEAN_TIME_DELAY = 10 * 60 * 1000;
     /**
-     * Default value of clean access count.
+     * Default value of clean modification count.
      */
-    public static final long DEFAULT_CLEAN_ACCESS_COUNT = 1000;
+    public static final long DEFAULT_CLEAN_MODIFICATION_COUNT = 1000;
     /**
      * Default value of max age.
      */
@@ -316,24 +316,24 @@ public class DiskCacheCore<K> {
     }
 
     /**
-     * Returns clean access count.
+     * Returns clean modification count.
      *
-     * @return the clean access count.
+     * @return the clean modification count.
      */
-    public long getCleanAccessCount() {
-        return propertyManager.getCleanAccessCount(DEFAULT_CLEAN_ACCESS_COUNT);
+    public long getCleanModificationCount() {
+        return propertyManager.getCleanModificationCount(DEFAULT_CLEAN_MODIFICATION_COUNT);
     }
 
     /**
-     * Sets clean access count.
+     * Sets clean modification count.
      * <p/>
      * Cleaning will be performed after a number of modification set by this value.
      *
-     * @param cleanAccessCount new value of clean access count.
+     * @param cleanAccessCount new value of clean modification count.
      * @see AbstractBackgroundCleaner
      */
-    public void setCleanAccessCount(long cleanAccessCount) {
-        propertyManager.setCleanAccessCount(cleanAccessCount);
+    public void setCleanModificationCount(long cleanAccessCount) {
+        propertyManager.setCleanModificationCount(cleanAccessCount);
     }
 
     /**
@@ -443,6 +443,7 @@ public class DiskCacheCore<K> {
      * @return the size of the cache.
      */
     public long size() {
+        cleaner.access(false, getCleanTimeDelay(), getCleanModificationCount());
         return Utils.calculateSize(cacheDirectory);
     }
 
@@ -500,7 +501,7 @@ public class DiskCacheCore<K> {
      * @throws IOException if I/O error occurred.
      */
     public File createFile(boolean directory, String prefix, String suffix) throws IOException {
-        cleaner.access(getCleanTimeDelay(), getCleanAccessCount());
+        cleaner.access(true, getCleanTimeDelay(), getCleanModificationCount());
         return Utils.createTempFile(directory, prefix, suffix, storageDirectory);
     }
 
@@ -512,6 +513,8 @@ public class DiskCacheCore<K> {
      * @throws NullPointerException if the file is null.
      */
     public boolean containsFile(File file) {
+        cleaner.access(false, getCleanTimeDelay(), getCleanModificationCount());
+
         if (file.getParentFile().equals(storageDirectory)) {
             return false;
         }
@@ -540,7 +543,7 @@ public class DiskCacheCore<K> {
             throw new IllegalArgumentException("cache doesn't own file " + file);
         }
 
-        cleaner.access(getCleanTimeDelay(), getCleanAccessCount()); // user possible has changed the content of the file
+        cleaner.access(true, getCleanTimeDelay(), getCleanModificationCount()); // user possible has changed the content of the file
         if (!file.setLastModified(System.currentTimeMillis())) {
             throw new IOException("cannot touch file " + file);
         }
@@ -564,6 +567,8 @@ public class DiskCacheCore<K> {
         if (file.getParentFile().equals(storageDirectory)) {
             throw new IllegalArgumentException("cache doesn't own file " + file);
         }
+
+        cleaner.access(true, getCleanTimeDelay(), getCleanModificationCount());
 
         if (!Utils.delete(file)) {
             throw new IOException("cannot remove file " + file);
@@ -628,6 +633,8 @@ public class DiskCacheCore<K> {
          * @throws IOException if I/O error occurred.
          */
         public void remove() throws IOException {
+            owner.cleaner.access(true, owner.getCleanTimeDelay(), owner.getCleanModificationCount());
+
             if (entryFile != null) {
                 boolean success = Utils.delete(entryFile);
                 if (!success) {
@@ -645,7 +652,7 @@ public class DiskCacheCore<K> {
          * @throws IOException if I/O error occurred.
          */
         public void commit() throws IOException {
-            owner.cleaner.access(owner.getCleanTimeDelay(), owner.getCleanAccessCount());
+            owner.cleaner.access(true, owner.getCleanTimeDelay(), owner.getCleanModificationCount());
 
             File tempEntryFile = null;
             File tempFile = owner.createFile("entry-", "-temp");
@@ -703,6 +710,7 @@ public class DiskCacheCore<K> {
      * @return the cache entry.
      */
     public Entry<K> create(K key) {
+        cleaner.access(false, getCleanTimeDelay(), getCleanModificationCount());
         return new Entry<K>(this, key);
     }
 
@@ -714,6 +722,7 @@ public class DiskCacheCore<K> {
      * @return the cache entry or null.
      */
     public Entry<K> search(K key) {
+        cleaner.access(false, getCleanTimeDelay(), getCleanModificationCount());
         File hashCodeDirectory = getHashCodeDirectory(key);
         File[] files = hashCodeDirectory.listFiles();
         if (files != null) {
